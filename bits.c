@@ -168,12 +168,12 @@ NOTES:
    - 3 additional Zanabazar Square characters */
 
 /*
-* This function returns the count of the number of 1's (set bits) in a 32-bit integer.
- *The function bitCount uses a series of bitwise masks and shifts to efficiently sum the bits.
+ * This function returns the count of the number of 1's (set bits) in a 32-bit integer.
+ * The function bitCount uses a series of bitwise masks and shifts to efficiently sum the bits.
  * It progressively reduces the number of bits to count by grouping them in larger
  * blocks with each step.
  *
- * Method:
+ * Approach:
  *     1. Initialize various masks to isolate and sum groups of bits.
  *     2. Use bitwise AND (`&`) to isolate the bits in the groups
  *      defined by each mask.
@@ -220,19 +220,33 @@ int bitCount(int x) {
      }
 
 /*
- * bitNor - ~(x | y) using only ~ and &
- *   The bitwise NOR operation (bitNor) is the complement of the OR operation.
- *   To implement ~(x | y), I used De Morgan's law:
- *     De Morgan's Law definition: ~(x | y) = ~x & ~y
- *   So, the result is obtained by inverting both `x` and `y` individually and then
- *   applying the AND operation on the results.
- *
- * bitNor - ~(x|y) using only ~ and & 
- *   Example: bitNor(0x6, 0x5) = 0xFFFFFFF8
- *   Legal ops: ~ &
- *   Max ops: 8
- *   Rating: 1
- */
+* Approach:
+* This function performs a bitwise NOR operation on two integers, x and y,
+* using only the bitwise NOT (~) and AND (&) operators. NOR is the complement
+* of the OR operation, meaning that for any bit where either x or y has a 1,
+* the result will be 0. For any bit where both x and y are 0, the result will be 1.
+
+* Steps I Followed:
+* The problem requires the implementation of a bitwise NOR operation, which
+* is the complement of the OR (|) operation. Normally, we would compute x | y
+* and then negate the result, but we’re restricted to using only the ~ and
+* & operators.
+* Apply De Morgan's Law: Using De Morgan's law:
+* ~(x | y) can be rewritten as ~x & ~y.
+* This transformation eliminates the need for the OR operator, allowing us to express
+* the NOR operation with only NOT and AND.
+* I applied the bitwise NOT operation to both x and y individually, which inverts
+*  the bits in both integers.
+* After inverting x and y, I applied the bitwise AND operation. This ensures that only
+* the bits where both ~x and ~y are 1 will remain set to 1 in the result. This effectively
+* implements the NOR operation.
+* The result of the AND operation between ~x and ~y gives us the desired result
+* for ~(x | y) bitNor - ~(x|y) using only ~ and &
+*   Example: bitNor(0x6, 0x5) = 0xFFFFFFF8
+*   Legal ops: ~ &
+*   Max ops: 8
+*   Rating: 1
+*/
 int bitNor(int x, int y) {
   return ~x & ~y;
 }
@@ -272,6 +286,13 @@ int byteSwap(int x, int n, int m) {
       return x;
 }
 /*
+ * Approach:
+ * This function multiplies an integer by 3/4, with the result rounded
+ * toward zero. The challenge is to efficiently perform this operation
+ * using only bitwise operators and addition, while handling overflow
+ * correctly and ensuring rounding behaves as expected for both positive
+ * and negative numbers.
+ *
  * ezThreeFourths - multiplies by 3/4 rounding toward 0,
  *   Should exactly duplicate effect of C expression (x*3/4),
  *   including overflow behavior.
@@ -289,7 +310,17 @@ int ezThreeFourths(int x) {
 
    return (three + bias) >> 2;
 }
-/* 
+/*
+ * Approach
+ * To solve the `float_abs` function, I first created a mask `m = 0x7FFFFFFF`
+ * to clear the sign bit of the floating-point number, effectively obtaining
+ * the absolute value by applying the mask using the bitwise AND operation (`uf & m`).
+ * Then, to handle NaN (Not a Number) cases, I compared the result to the smallest
+ * NaN value, `min = 0x7F800001`. If the result was equal to or greater than
+ * this value, I returned the original input `uf` (indicating it was a NaN).
+ * Otherwise, I returned the masked result `res`, which is the absolute value
+ * of the input.
+ *
  * float_abs - Return bit-level equivalent of absolute value of f for
  *   floating point argument f.
  *   Both the argument and result are passed as unsigned int's, but
@@ -327,7 +358,10 @@ unsigned float_abs(unsigned uf) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+
+   if (((uf << 1) >> 24) == 0xFF && ((uf << 9) != 0))
+      return uf;
+   return (1 << 31) ^ uf;
 }
 /* 
  * isAsciiDigit - return 1 if 0x30 <= x <= 0x39 (ASCII codes for characters '0' to '9')
@@ -353,5 +387,8 @@ int isAsciiDigit(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+
+   int pos = x >> 31;
+
+   return !(pos | (!x));
 }
